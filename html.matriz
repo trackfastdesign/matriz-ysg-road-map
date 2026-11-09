@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matriz de Priorização - 60 Projetos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; min-height: 100vh; }
+    h1 { text-align: center; font-size: 1.8em; margin-bottom: 8px; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 0.95em; }
+    .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto 40px; }
+    .quadrant { border-radius: 16px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); }
+    .q1 { background: linear-gradient(135deg, #065f46, #064e3b); border-color: #10b981; }
+    .q2 { background: linear-gradient(135deg, #1e3a5f, #172554); border-color: #3b82f6; }
+    .q3 { background: linear-gradient(135deg, #713f12, #78350f); border-color: #f59e0b; }
+    .q4 { background: linear-gradient(135deg, #4c1d2e, #4c0519); border-color: #f43f5e; }
+    .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .q-header h2 { font-size: 1.15em; }
+    .q-header .emoji { font-size: 1.6em; }
+    .q-badge { font-size: 0.7em; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .q1 .q-badge { background: #10b981; color: #064e3b; }
+    .q2 .q-badge { background: #3b82f6; color: #172554; }
+    .q3 .q-badge { background: #f59e0b; color: #78350f; }
+    .q4 .q-badge { background: #f43f5e; color: #4c0519; }
+    .q-desc { font-size: 0.82em; color: #cbd5e1; margin-bottom: 14px; line-height: 1.5; }
+    .project-list { list-style: none; }
+    .project-list li { padding: 8px 12px; margin-bottom: 6px; background: rgba(0,0,0,0.25); border-radius: 8px; font-size: 0.85em; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
+    .project-list li:hover { transform: translateX(4px); }
+    .project-num { font-weight: 700; color: #94a3b8; min-width: 28px; }
+    
+    .timeline { max-width: 1200px; margin: 0 auto 40px; }
+    .timeline h2 { text-align: center; font-size: 1.4em; margin-bottom: 24px; color: #c084fc; }
+    .phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .phase { background: #1e293b; border-radius: 14px; padding: 20px; border-top: 4px solid; }
+    .phase:nth-child(1) { border-color: #10b981; }
+    .phase:nth-child(2) { border-color: #3b82f6; }
+    .phase:nth-child(3) { border-color: #f59e0b; }
+    .phase:nth-child(4) { border-color: #f43f5e; }
+    .phase h3 { font-size: 0.95em; margin-bottom: 4px; }
+    .phase .period { font-size: 0.78em; color: #94a3b8; margin-bottom: 12px; }
+    .phase .count { font-size: 2em; font-weight: 800; }
+    .phase .label { font-size: 0.75em; color: #94a3b8; }
+    
+    .scoring { max-width: 1200px; margin: 0 auto 40px; background: #1e293b; border-radius: 16px; padding: 28px; }
+    .scoring h2 { font-size: 1.3em; margin-bottom: 20px; color: #38bdf8; text-align: center; }
+    .score-table { width: 100%; border-collapse: collapse; }
+    .score-table th { text-align: left; padding: 10px 14px; background: #334155; font-size: 0.82em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .score-table th:first-child { border-radius: 8px 0 0 8px; }
+    .score-table th:last-child { border-radius: 0 8px 8px 0; }
+    .score-table td { padding: 10px 14px; font-size: 0.85em; border-bottom: 1px solid #334155; }
+    .score-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .score-bar { height: 8px; border-radius: 4px; background: #334155; position: relative; min-width: 100px; }
+    .score-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+    .high .score-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+    .med .score-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .low .score-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .vlow .score-fill { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+    .tip-box { background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 14px; padding: 24px; max-width: 1200px; margin: 0 auto; border: 1px solid #6366f1; }
+    .tip-box h2 { color: #a5b4fc; margin-bottom: 16px; font-size: 1.2em; }
+    .tip-box ul { list-style: none; }
+    .tip-box li { padding: 8px 0; font-size: 0.9em; line-height: 1.6; border-bottom: 1px solid rgba(99,102,241,0.2); }
+    .tip-box li:last-child { border: none; }
+    .tip-box li::before { content: "✦ "; color: #818cf8; }
+    
+    @media (max-width: 768px) {
+      .matrix, .phases { grid-template-columns: 1fr; }
+      body { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Matriz de Priorização — 60 Projetos</h1>
+  <p class="subtitle">Framework ICE adaptado · Impacto × Confiança × Facilidade</p>
+
+  <div class="matrix">
+    <div class="quadrant q1">
+      <div class="q-header">
+        <span class="emoji">🚀</span>
+        <div>
+          <h2>FAZER AGORA</h2>
+          <span class="q-badge">Score 4.0–5.0</span>
+        </div>
+      </div>
+      <p class="q-desc">Alto impacto + Alta facilidade. São seus "quick wins" estratégicos. Comece por aqui!</p>
+      <ul class="project-list">
+        <li><span class="project-num">#47</span> Manual Estratégico OKRs 2026</li>
+        <li><span class="project-num">#46</span> YACO CRM Sponsorship Manager</li>
+        <li><span class="project-num">#39</span> Painel Estratégico de Agências</li>
+        <li><span class="project-num">#10</span> ACTION HISTORY Flipbook Podcast</li>
+        <li><span class="project-num">#55</span> TUTORIALS TODAY 77</li>
+        <li><span class="project-num">#56</span> Instant Format Presentations</li>
+        <li><span class="project-num">#3</span> YSBrain Business Model</li>
+        <li><span class="project-num">#59</span> Gain Format (Financeiro)</li>
+        <li><span class="project-num">#24</span> Coach/Podcast</li>
+        <li><span class="project-num">#14</span> Santa Clara Digital Bookstore</li>
+      </ul>
+    </div>
+
+    <div class="quadrant q2">
+      <div class="q-header">
+        <span class="emoji">📋</span>
+        <div>
+          <h2>PLANEJAR & AGENDAR</h2>
+          <span class="q-badge">Score 3.0–3.9</span>
+        </div>
+      </div>
+      <p class="q-desc">Alto impacto, mas exige mais recursos/tempo. Planeje sprints dedicados.</p>
+      <ul class="project-list">
+        <li><span class="project-num">#4</span> APP Ant-Panic</li>
+        <li><span class="project-num">#17</span> Data Research Solutions Metropolis</li>
+        <li><span class="project-num">#36</span> Advanced AR Solutions Partners</li>
+        <li><span class="project-num">#12</span> STUDO TODAY 7 AR/VR</li>
+        <li><span class="project-num">#43</span> MediaStudio Pro</li>
+        <li><span class="project-num">#52</span> Holistic 3D Corporate / Interative</li>
+        <li><span class="project-num">#49</span> Projeto História do Líbano</li>
+        <li><span class="project-num">#41</span> Lebanese Food Delivery</li>
+        <li><span class="project-num">#18</span> Grupo Vatejo Brasil</li>
+        <li><span class="project-num">#54</span> Kobe Memorial Streaming</li>
+        <li><span class="project-num">#38</span> Gemini Voice & Text</li>
+        <li><span class="project-num">#7</span> Track Fast Design</li>
+        <li><span class="project-num">#60</span> Upper Boost Edit</li>
+        <li><span class="project-num">#11</span> Security Man</li>
+        <li><span class="project-num">#44</span> After Compliance</li>
+      </ul>
+    </div>
+
+    <div class="quadrant q3">
+      <div class="q-header">
+        <span class="emoji">💡</span>
+        <div>
+          <h2>INCUBAR & VALIDAR</h2>
+          <span class="q-badge">Score 2.0–2.9</span>
+        </div>
+      </div>
+      <p class="q-desc">Potencial interessante, mas precisa de validação. Crie MVPs antes de investir.</p>
+      <ul class="project-list">
+        <li><span class="project-num">#6</span> TVPEFORM EXPRESS</li>
+        <li><span class="project-num">#8</span> TENDERAH</li>
+        <li><span class="project-num">#13</span> Toros Design</li>
+        <li><span class="project-num">#16</span> SICLASMARTER</li>
+        <li><span class="project-num">#28</span> Transport Case / Wave</li>
+        <li><span class="project-num">#29</span> Sevtor Datafile Model</li>
+        <li><span class="project-num">#37</span> Rosa Chá Renaissance Swimwear</li>
+        <li><span class="project-num">#42</span> Spark Builder</li>
+        <li><span class="project-num">#48</span> Audit Mobil 77</li>
+        <li><span class="project-num">#50</span> Booble Sector Datafile</li>
+        <li><span class="project-num">#51</span> NFTs / E-mail MKT YCJF</li>
+        <li><span class="project-num">#53</span> Plebiscito</li>
+        <li><span class="project-num">#57</span> Aposta</li>
+        <li><span class="project-num">#58</span> Green Portrait More Docs Plus</li>
+        <li><span class="project-num">#25</span> Fabrics</li>
+      </ul>
+    </div>
+
+    <div class="quadrant q4">
+      <div class="q-header">
+        <span class="emoji">📦</span>
+        <div>
+          <h2>BACKLOG / REAVALIAR</h2>
+          <span class="q-badge">Score 1.0–1.9</span>
+        </div>
+      </div>
+      <p class="q-desc">Ideias em estágio inicial. Guardar, mas não investir energia agora.</p>
+      <ul class="project-list">
+        <li><span class="project-num">#1</span> YACOIOEF</li>
+        <li><span class="project-num">#2</span> Time to Beep Click</li>
+        <li><span class="project-num">#5</span> SINTONENYY</li>
+        <li><span class="project-num">#9</span> AETOEF_T</li>
+        <li><span class="project-num">#15</span> 2PN</li>
+        <li><span class="project-num">#19</span> Buindfold Blindlys</li>
+        <li><span class="project-num">#20</span> Martial_Ark</li>
+        <li><span class="project-num">#21</span> Mogs</li>
+        <li><span class="project-num">#22</span> gayAPMAE>NOM</li>
+        <li><span class="project-num">#23</span> Music The Turn / Face Turn</li>
+        <li><span class="project-num">#26</span> MIAD</li>
+        <li><span class="project-num">#27</span> carFORDEND</li>
+        <li><span class="project-num">#30</span> Sala THS</li>
+        <li><span class="project-num">#31</span> TV Dark SAIUI</li>
+        <li><span class="project-num">#32</span> River Silence / Rid Azul</li>
+        <li><span class="project-num">#33</span> Tasks Short One</li>
+        <li><span class="project-num">#34</span> Clarensse / Clareense</li>
+        <li><span class="project-num">#35</span> Drop Set Fast Sit</li>
+        <li><span class="project-num">#40</span> Do-Chilling-Time</li>
+        <li><span class="project-num">#45</span> 4U</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <h2>📅 Roadmap de Execução Sugerido</h2>
+    <div class="phases">
+      <div class="phase">
+        <h3>🟢 Fase 1</h3>
+        <p class="period">Nov–Dez 2026</p>
+        <div class="count">10</div>
+        <div class="label">projetos "Quick Wins"</div>
+      </div>
+      <div class="phase">
+        <h3>🔵 Fase 2</h3>
+        <p class="period">Jan–Mar 2027</p>
+        <div class="count">15</div>
+        <div class="label">projetos planejados</div>
+      </div>
+      <div class="phase">
+        <h3>🟡 Fase 3</h3>
+        <p class="period">Abr–Jul 2027</p>
+        <div class="count">15</div>
+        <div class="label">projetos em validação</div>
+      </div>
+      <div class="phase">
+        <h3>🔴 Fase 4</h3>
+        <p class="period">Ago 2027+</p>
+        <div class="count">20</div>
+        <div class="label">backlog p/ reavaliação</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scoring">
+    <h2>📊 Exemplo de Scoring ICE — Top 10 Prioritários</h2>
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Projeto</th>
+          <th>Impacto</th>
+          <th>Confiança</th>
+          <th>Facilidade</th>
+          <th>Score</th>
+          <th>Visual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>47</td><td>Manual OKRs 2026</td><td>5</td><td>5</td><td>4</td><td><strong>4.7</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:94%"></div></div></td></tr>
+        <tr><td>46</td><td>YACO CRM</td><td>5</td><td>4</td><td>4</td><td><strong>4.3</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:87%"></div></div></td></tr>
+        <tr><td>39</td><td>Painel Agências</td><td>5</td><td>4</td><td>4</td><td><strong>4.3</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:87%"></div></div></td></tr>
+        <tr><td>10</td><td>ACTION HISTORY Podcast</td><td>4</td><td>5</td><td>4</td><td><strong>4.3</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:87%"></div></div></td></tr>
+        <tr><td>55</td><td>Tutorials Today 77</td><td>4</td><td>4</td><td>5</td><td><strong>4.3</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:87%"></div></div></td></tr>
+        <tr><td>3</td><td>YSBrain</td><td>5</td><td>4</td><td>3</td><td><strong>4.0</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+        <tr><td>56</td><td>Instant Presentations</td><td>4</td><td>4</td><td>4</td><td><strong>4.0</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+        <tr><td>59</td><td>Gain Format</td><td>5</td><td>3</td><td>4</td><td><strong>4.0</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+        <tr><td>24</td><td>Coach/Podcast</td><td>4</td><td>4</td><td>4</td><td><strong>4.0</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+        <tr><td>14</td><td>Santa Clara Bookstore</td><td>4</td><td>4</td><td>4</td><td><strong>4.0</strong></td><td class="high"><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <br>
+  <div class="tip-box">
+    <h2>💎 Regras de Ouro para 60 Projetos</h2>
+    <ul>
+      <li><strong>Regra 3-3-3:</strong> No máximo 3 projetos ativos, 3 em planejamento e 3 em validação simultâneos</li>
+      <li><strong>Kill Criteria:</strong> Se em 30 dias um projeto não avançou, mova para o backlog sem culpa</li>
+      <li><strong>Agrupamento:</strong> Projetos similares (ex: #29 + #50 Datafile) podem virar UM SÓ projeto</li>
+      <li><strong>Review Mensal:</strong> Todo dia 1º, reavalie scores — o mercado muda, suas prioridades também</li>
+      <li><strong>Energia Finita:</strong> 60 ideias ≠ 60 execuções. Os melhores empreendedores dizem NÃO para 90%</li>
+      <li><strong>MVP First:</strong> Antes de construir, valide com uma landing page simples ou formulário</li>
+    </ul>
+  </div>
+</body>
+</html>
